@@ -103,20 +103,26 @@ function sanitize(text: string): string {
 export async function POST(request: NextRequest) {
   const requestId = Date.now().toString(36);
 
-  const ip = request.headers.get('x-forwarded-for')?.split(',')[0]?.trim()
-    || request.headers.get('x-real-ip')
-    || 'unknown';
-
-  const rateLimit = checkRateLimit(ip);
-  if (!rateLimit.allowed) {
-    return NextResponse.json(
-      { error: 'Too many submissions. Please try again later.', retryAfter: rateLimit.retryAfter },
-      { status: 429, headers: { 'Retry-After': String(rateLimit.retryAfter) } }
-    );
-  }
-
   try {
-    const body = await request.json();
+    const ip = request.headers.get('x-forwarded-for')?.split(',')[0]?.trim()
+      || request.headers.get('x-real-ip')
+      || 'unknown';
+
+    const rateLimit = checkRateLimit(ip);
+    if (!rateLimit.allowed) {
+      return NextResponse.json(
+        { error: 'Too many submissions. Please try again later.', retryAfter: rateLimit.retryAfter },
+        { status: 429, headers: { 'Retry-After': String(rateLimit.retryAfter) } }
+      );
+    }
+
+    let body;
+    try {
+      body = await request.json();
+    } catch {
+      return NextResponse.json({ error: 'Invalid JSON in request body' }, { status: 400 });
+    }
+    
     const validated = validateContactForm(body);
 
     if (detectSpam(validated.subject, validated.message)) {
