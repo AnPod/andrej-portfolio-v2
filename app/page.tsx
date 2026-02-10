@@ -900,103 +900,211 @@ export default function Page() {
       </nav>
 
       {/* Hero Section */}
-      <section className="relative min-h-screen flex items-center justify-center overflow-hidden">
-        {/* Floating decorative elements */}
+      <section className="relative min-h-screen flex items-center justify-center overflow-hidden" style={{ perspective: "1000px" }}>
+        {/* Cyberpunk Grid Background */}
         <div className="absolute inset-0 pointer-events-none">
-          {[...Array(5)].map((_, i) => (
+          <div className="absolute inset-0 bg-[linear-gradient(rgba(0,255,255,0.03)_1px,transparent_1px),linear-gradient(90deg,rgba(0,255,255,0.03)_1px,transparent_1px)] bg-[size:60px_60px] [transform:perspective(500px)_rotateX(60deg)_translateY(-100px)_scale(2)]" />
+          <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-[#0a0a0a]" />
+        </div>
+
+        {/* Animated Gradient Orbs */}
+        <div className="absolute inset-0 pointer-events-none overflow-hidden">
+          <motion.div
+            className="absolute w-[600px] h-[600px] rounded-full"
+            style={{
+              background: "radial-gradient(circle, rgba(6,182,212,0.15)_0%,transparent_70%)",
+              filter: "blur(60px)",
+              left: "10%",
+              top: "20%",
+            }}
+            animate={{
+              x: [0, 100, 0],
+              y: [0, -50, 0],
+              scale: [1, 1.2, 1],
+            }}
+            transition={{ duration: 8, repeat: Infinity, ease: "easeInOut" }}
+          />
+          <motion.div
+            className="absolute w-[500px] h-[500px] rounded-full"
+            style={{
+              background: "radial-gradient(circle, rgba(217,70,239,0.15)_0%,transparent_70%)",
+              filter: "blur(60px)",
+              right: "10%",
+              bottom: "20%",
+            }}
+            animate={{
+              x: [0, -80, 0],
+              y: [0, 60, 0],
+              scale: [1, 1.3, 1],
+            }}
+            transition={{ duration: 10, repeat: Infinity, ease: "easeInOut", delay: 1 }}
+          />
+          <motion.div
+            className="absolute w-[400px] h-[400px] rounded-full"
+            style={{
+              background: "radial-gradient(circle, rgba(251,191,36,0.1)_0%,transparent_70%)",
+              filter: "blur(50px)",
+              left: "40%",
+              top: "50%",
+            }}
+            animate={{
+              scale: [1, 1.5, 1],
+              opacity: [0.5, 0.8, 0.5],
+            }}
+            transition={{ duration: 6, repeat: Infinity, ease: "easeInOut", delay: 2 }}
+          />
+        </div>
+
+        {/* Floating Particles with Connections */}
+        <div className="absolute inset-0 pointer-events-none">
+          {[...Array(20)].map((_, i) => (
             <motion.div
               key={i}
-              className="absolute w-2 h-2 bg-cyan-400/30 rounded-full"
+              className="absolute w-1 h-1 bg-cyan-400/60 rounded-full"
               style={{
-                left: `${20 + i * 15}%`,
-                top: `${30 + (i % 2) * 30}%`,
+                left: `${Math.random() * 100}%`,
+                top: `${Math.random() * 100}%`,
+                boxShadow: "0 0 10px rgba(6,182,212,0.8)",
               }}
               animate={{
-                y: [0, -30, 0],
-                opacity: [0.3, 0.8, 0.3],
-                scale: [1, 1.5, 1],
+                y: [0, -100 - Math.random() * 100, 0],
+                x: [0, (Math.random() - 0.5) * 50, 0],
+                opacity: [0, 1, 0],
+                scale: [0.5, 1.5, 0.5],
               }}
               transition={{
-                duration: 3 + i * 0.5,
+                duration: 4 + Math.random() * 4,
                 repeat: Infinity,
-                delay: i * 0.3,
+                delay: Math.random() * 4,
                 ease: "easeInOut",
               }}
             />
           ))}
         </div>
 
+        {/* Spotlight Effect */}
+        <motion.div
+          className="absolute inset-0 pointer-events-none"
+          style={{
+            background: "radial-gradient(circle at var(--mouse-x, 50%) var(--mouse-y, 50%), rgba(6,182,212,0.08)_0%,transparent_50%)",
+          }}
+          animate={{
+            opacity: [0.5, 0.8, 0.5],
+          }}
+          transition={{ duration: 4, repeat: Infinity }}
+        />
+
         <motion.div 
           style={{ y, opacity, scale }}
-          className="relative z-10 max-w-6xl mx-auto px-6 text-center"
+          className="relative z-10 max-w-7xl mx-auto px-6 text-center"
         >
-          {/* Eyebrow */}
+          {/* Glitch Eyebrow */}
           <motion.div
-            initial={{ opacity: 0, y: 30, scale: 0.9 }}
-            animate={{ opacity: 1, y: 0, scale: 1 }}
+            initial={{ opacity: 0, y: 30 }}
+            animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, delay: 0.2, ease: [0.16, 1, 0.3, 1] }}
             className="mb-8"
           >
             <motion.span 
-              className="inline-flex items-center gap-2 px-4 py-2 text-xs font-mono tracking-widest text-cyan-400 border border-cyan-400/20 bg-cyan-400/5 rounded-full"
-              whileHover={{ scale: 1.05, borderColor: "rgba(34, 211, 238, 0.5)" }}
+              className="inline-flex items-center gap-2 px-6 py-3 text-sm font-mono tracking-widest text-cyan-400 border border-cyan-400/30 bg-cyan-400/5 rounded-full relative overflow-hidden group"
+              whileHover={{ scale: 1.05, borderColor: "rgba(34, 211, 238, 0.8)" }}
             >
               <motion.span
-                animate={{ rotate: [0, 15, -15, 0] }}
+                className="absolute inset-0 bg-gradient-to-r from-transparent via-cyan-400/20 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-700"
+              />
+              <motion.span
+                animate={{ rotate: [0, 15, -15, 0], scale: [1, 1.2, 1] }}
                 transition={{ duration: 2, repeat: Infinity }}
               >
-                <Sparkles className="w-3 h-3" />
+                <Sparkles className="w-4 h-4" />
               </motion.span>
-              AVAILABLE FOR PROJECTS
+              <span className="relative">AVAILABLE FOR PROJECTS</span>
             </motion.span>
           </motion.div>
 
-          {/* Main Headline with character animation */}
-          <div className="overflow-hidden mb-8">
-            <motion.h1 
-              initial={{ y: 120, opacity: 0 }}
-              animate={{ y: 0, opacity: 1 }}
+          {/* Main Headline with 3D Effect */}
+          <div className="overflow-hidden mb-8" style={{ perspective: "1000px" }}>
+            <motion.div
+              initial={{ rotateX: 45, opacity: 0 }}
+              animate={{ rotateX: 0, opacity: 1 }}
               transition={{ duration: 1.2, delay: 0.4, ease: [0.16, 1, 0.3, 1] }}
-              className="text-5xl md:text-7xl lg:text-9xl font-bold leading-[0.9] tracking-tighter font-display"
+              style={{ transformStyle: "preserve-3d" }}
             >
-              <motion.span 
-                className="block"
-                initial={{ x: -50, opacity: 0 }}
-                animate={{ x: 0, opacity: 1 }}
-                transition={{ duration: 0.8, delay: 0.6 }}
+              <motion.h1 
+                className="text-6xl md:text-8xl lg:text-[10rem] font-bold leading-[0.85] tracking-tighter font-display"
               >
-                AI
-              </motion.span>
-              <motion.span 
-                className="block bg-gradient-to-r from-cyan-400 via-fuchsia-500 to-amber-400 bg-clip-text text-transparent"
-                initial={{ scale: 0.8, opacity: 0 }}
-                animate={{ scale: 1, opacity: 1 }}
-                transition={{ duration: 1, delay: 0.7, ease: [0.16, 1, 0.3, 1] }}
-              >
-                SOLUTION
-              </motion.span>
-              <motion.span 
-                className="block"
-                initial={{ x: 50, opacity: 0 }}
-                animate={{ x: 0, opacity: 1 }}
-                transition={{ duration: 0.8, delay: 0.8 }}
-              >
-                ARCHITECT
-              </motion.span>
-            </motion.h1>
+                <motion.span 
+                  className="block relative"
+                  initial={{ x: -100, opacity: 0 }}
+                  animate={{ x: 0, opacity: 1 }}
+                  transition={{ duration: 0.8, delay: 0.6, ease: [0.16, 1, 0.3, 1] }}
+                >
+                  <span className="relative inline-block">
+                    AI
+                    <motion.span
+                      className="absolute -inset-2 bg-cyan-400/20 blur-xl -z-10"
+                      animate={{ opacity: [0.5, 1, 0.5], scale: [1, 1.1, 1] }}
+                      transition={{ duration: 2, repeat: Infinity }}
+                    />
+                  </span>
+                </motion.span>
+                <motion.span 
+                  className="block bg-gradient-to-r from-cyan-400 via-fuchsia-500 to-amber-400 bg-clip-text text-transparent relative"
+                  initial={{ scale: 0.5, opacity: 0 }}
+                  animate={{ scale: 1, opacity: 1 }}
+                  transition={{ duration: 1, delay: 0.7, ease: [0.16, 1, 0.3, 1] }}
+                >
+                  <span className="relative inline-block">
+                    SOLUTION
+                    <motion.span
+                      className="absolute inset-0 bg-gradient-to-r from-cyan-400 via-fuchsia-500 to-amber-400 blur-2xl opacity-30 -z-10"
+                      animate={{ opacity: [0.3, 0.6, 0.3] }}
+                      transition={{ duration: 3, repeat: Infinity }}
+                    />
+                  </span>
+                </motion.span>
+                <motion.span 
+                  className="block relative"
+                  initial={{ x: 100, opacity: 0 }}
+                  animate={{ x: 0, opacity: 1 }}
+                  transition={{ duration: 0.8, delay: 0.8, ease: [0.16, 1, 0.3, 1] }}
+                >
+                  <span className="relative inline-block">
+                    ARCHITECT
+                    <motion.span
+                      className="absolute -inset-2 bg-fuchsia-400/20 blur-xl -z-10"
+                      animate={{ opacity: [0.5, 1, 0.5], scale: [1, 1.1, 1] }}
+                      transition={{ duration: 2, repeat: Infinity, delay: 0.5 }}
+                    />
+                  </span>
+                </motion.span>
+              </motion.h1>
+            </motion.div>
           </div>
 
-          {/* Subheadline */}
+          {/* Animated Tagline */}
           <motion.p
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, delay: 1 }}
-            className="text-lg md:text-xl text-white/50 max-w-2xl mx-auto mb-12 leading-relaxed"
+            className="text-xl md:text-2xl text-white/60 max-w-3xl mx-auto mb-12 leading-relaxed"
           >
-            {professionalData.tagline}
+            <motion.span
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ duration: 0.5, delay: 1.2 }}
+            >
+              Building AI products that deliver{" "}
+            </motion.span>
+            <motion.span
+              className="text-cyan-400 font-semibold"
+              initial={{ opacity: 0, scale: 0.8 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ duration: 0.5, delay: 1.4 }}
+            >
+              real business value
+            </motion.span>
           </motion.p>
-
-          {/* CTA */}
           <motion.div
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
