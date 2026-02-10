@@ -97,7 +97,7 @@ export function detectSpam(subject, message) {
   }
 
   if (/(.)
-{10,}/.test(combinedText)) {
+\1{10,}/.test(combinedText)) {
     return true;
   }
 
