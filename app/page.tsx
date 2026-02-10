@@ -8,6 +8,7 @@ import {
   Send, CheckCircle, AlertCircle
 } from "lucide-react";
 import { useRef, useState, useEffect } from "react";
+import WebGLEffects from "./components/WebGLEffects";
 
 // ============================================
 // DATA
@@ -901,6 +902,9 @@ export default function Page() {
 
       {/* Hero Section */}
       <section className="relative min-h-screen flex items-center justify-center overflow-hidden" style={{ perspective: "1000px" }}>
+        {/* WebGL Smoke & Effects */}
+        <WebGLEffects />
+
         {/* Cyberpunk Grid Background */}
         <div className="absolute inset-0 pointer-events-none">
           <div className="absolute inset-0 bg-[linear-gradient(rgba(0,255,255,0.03)_1px,transparent_1px),linear-gradient(90deg,rgba(0,255,255,0.03)_1px,transparent_1px)] bg-[size:60px_60px] [transform:perspective(500px)_rotateX(60deg)_translateY(-100px)_scale(2)]" />
