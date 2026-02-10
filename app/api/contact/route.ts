@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 
-const RECIPIENT_EMAIL = 'andrej@podgorsek.de';
+const RECIPIENT_EMAIL = 'drejc83@gmail.com';
 
 // Simple in-memory rate limiting
 const rateLimitMap = new Map<string, { count: number; resetTime: number }>();
