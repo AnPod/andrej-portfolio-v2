@@ -1061,6 +1061,93 @@ export default function Page() {
         </div>
       </section>
 
+      {/* Industry Use Cases Section */}
+      <section id="industries" className="relative py-32 px-6">
+        <div className="max-w-7xl mx-auto">
+          {/* Section Header */}
+          <motion.div 
+            className="text-center mb-20"
+            initial={{ opacity: 0, y: 40 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.8 }}
+          >
+            <span className="text-xs font-mono text-cyan-400 tracking-widest mb-4 block">INDUSTRY SOLUTIONS</span>
+            <h2 className="text-4xl md:text-6xl font-bold font-display mb-6">
+              AI across <span className="text-cyan-400">industries</span>
+            </h2>
+            <p className="text-white/50 text-lg max-w-2xl mx-auto">
+              Proven AI solutions delivering measurable impact across diverse sectors
+            </p>
+          </motion.div>
+
+          {/* Industry Grid */}
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {[
+              {
+                industry: "Manufacturing",
+                icon: "🏭",
+                useCases: ["Predictive maintenance", "Quality control automation", "Process optimization", "Supply chain forecasting"],
+                impact: "30% downtime reduction"
+              },
+              {
+                industry: "Healthcare",
+                icon: "🏥",
+                useCases: ["Clinical decision support", "Patient triage automation", "Medical imaging analysis", "Drug discovery"],
+                impact: "50% faster diagnosis"
+              },
+              {
+                industry: "Finance",
+                icon: "🏦",
+                useCases: ["Fraud detection", "Risk assessment", "Algorithmic trading", "Credit scoring"],
+                impact: "99.9% fraud catch rate"
+              },
+              {
+                industry: "Automotive",
+                icon: "🚗",
+                useCases: ["Autonomous systems", "Predictive maintenance", "Quality inspection", "Supply chain optimization"],
+                impact: "25% cost savings"
+              },
+              {
+                industry: "Telecommunications",
+                icon: "📡",
+                useCases: ["Network optimization", "Churn prediction", "Customer service AI", "Anomaly detection"],
+                impact: "40% churn reduction"
+              },
+              {
+                industry: "Insurance",
+                icon: "🛡️",
+                useCases: ["Claims automation", "Underwriting assistance", "Fraud detection", "Risk modeling"],
+                impact: "60% faster claims"
+              }
+            ].map((item, index) => (
+              <motion.div
+                key={item.industry}
+                initial={{ opacity: 0, y: 30 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.5, delay: index * 0.1 }}
+                className="group relative p-8 bg-white/[0.02] border border-white/10 hover:border-cyan-400/30 rounded-2xl transition-all duration-300 hover:bg-white/[0.04]"
+              >
+                <div className="text-4xl mb-4">{item.icon}</div>
+                <h3 className="text-xl font-bold mb-4 group-hover:text-cyan-400 transition-colors">{item.industry}</h3>
+                <ul className="space-y-2 mb-6">
+                  {item.useCases.map((useCase) => (
+                    <li key={useCase} className="text-sm text-white/50 flex items-center gap-2">
+                      <span className="w-1 h-1 bg-cyan-400 rounded-full" />
+                      {useCase}
+                    </li>
+                  ))}
+                </ul>
+                <div className="pt-4 border-t border-white/10">
+                  <span className="text-xs font-mono text-fuchsia-400">{item.impact}</span>
+                </div>
+              </motion.div>
+            ))}
+          </div>
+        </div>
+      </section>
+
       {/* Stats Section */}
       <section className="relative py-20 px-6 border-y border-white/5">
         <div className="max-w-7xl mx-auto">
