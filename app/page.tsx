@@ -599,21 +599,13 @@ function ContactForm() {
     message: '',
     honeypot: '',
   });
-  const [status, setStatus] = useState('idle');
+  const [status, setStatus] = useState<'idle' | 'sending' | 'success' | 'error'>('idle');
   const [errorMessage, setErrorMessage] = useState('');
-  const [submitTime, setSubmitTime] = useState(null);
 
-  useEffect(() => {
-    setSubmitTime(Date.now());
-  }, []);
-
-  const validateEmail = (email) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+  const validateEmail = (email: string) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
 
   const validateForm = () => {
     if (formData.honeypot) return 'Invalid submission';
-    
-    const timeSinceMount = Date.now() - submitTime;
-    if (timeSinceMount < 2000) return 'Please wait a moment before submitting';
     
     if (!formData.email.trim()) return 'Email is required';
     if (!validateEmail(formData.email)) return 'Please enter a valid email';
@@ -623,7 +615,7 @@ function ContactForm() {
     return null;
   };
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
     const validationError = validateForm();
@@ -657,13 +649,13 @@ function ContactForm() {
       setStatus('success');
       setFormData({ email: '', subject: '', message: '', honeypot: '' });
       setTimeout(() => setStatus('idle'), 5000);
-    } catch (error) {
+    } catch (error: unknown) {
       setStatus('error');
-      setErrorMessage(error.message || 'Failed to send message');
+      setErrorMessage(error instanceof Error ? error.message : 'Failed to send message');
     }
   };
 
-  const handleChange = (e) => {
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
@@ -676,7 +668,7 @@ function ContactForm() {
         name="honeypot"
         value={formData.honeypot}
         onChange={handleChange}
-        tabIndex="-1"
+        tabIndex={-1}
         autoComplete="off"
         className="absolute opacity-0 pointer-events-none"
         aria-hidden="true"
