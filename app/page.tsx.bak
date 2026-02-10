@@ -1,0 +1,165 @@
+"use client";
+
+import { motion, useScroll, useTransform, useSpring, useMotionValue } from "framer-motion";
+import { 
+  ArrowUpRight, Sparkles, Zap, Brain, Workflow, FileText, 
+  Server, Users, Target, Mail, MapPin, Github, Linkedin,
+  Award, Terminal, Cpu, Globe, ChevronDown, Send, X
+} from "lucide-react";
+import { useRef, useState, useEffect } from "react";
+
+// Professional data
+const professionalData = {
+  name: "Andrej Podgorsek",
+  title: "AI Solution Architect",
+  tagline: "Building AI products that deliver real business value",
+  description: "AI Architect, Engineer & Product Manager with 20+ years building AI-powered products. Specialized in AI system architecture, product development, and implementation across manufacturing, automotive, healthcare, banking, insurance, and telecommunications.",
+  location: "Šentvid pri Stični, Slovenia",
+  email: "andrej@podgorsek.de",
+  website: "podgorsek.de",
+  certifications: [
+    "AI Solution Architect Expert (2026)",
+    "Databricks Machine Learning Professional (2024)", 
+    "ISAQB Software Architect Certified (2017)",
+    "AWS Certified (2023)",
+    "Azure Certified (2023)",
+    "GCP Certified (2024)"
+  ],
+  expertise: [
+    { area: "AI Architecture", level: 95, icon: Brain },
+    { area: "System Design", level: 90, icon: Cpu },
+    { area: "Product Management", level: 85, icon: Target },
+    { area: "Full-Stack Development", level: 88, icon: Terminal },
+    { area: "Cloud Infrastructure", level: 82, icon: Globe },
+    { area: "AI/ML Engineering", level: 90, icon: Sparkles }
+  ]
+};
+
+const projects = [
+  {
+    id: 1,
+    title: "Code Review Agent",
+    description: "AI-powered code review with inline suggestions, security scanning, and automated quality gates.",
+    icon: Brain,
+    color: "from-violet-500 via-fuchsia-500 to-pink-500",
+    glow: "violet",
+    tags: ["TypeScript", "AI", "GitHub API"],
+    useCases: [
+      { industry: "Banking", description: "Secure code review for payment systems with compliance checks" },
+      { industry: "Healthcare", description: "HIPAA-compliant code validation for patient data handling" },
+      { industry: "Automotive", description: "Safety-critical firmware review for autonomous driving systems" },
+      { industry: "Military", description: "Classified codebase security scanning" },
+    ],
+  },
+  {
+    id: 2,
+    title: "Human-in-the-Loop",
+    description: "Smart approval workflows with AI suggestions and human oversight controls.",
+    icon: Users,
+    color: "from-cyan-400 via-blue-500 to-indigo-500",
+    glow: "cyan",
+    tags: ["React", "Workflow", "AI"],
+    useCases: [
+      { industry: "Insurance", description: "Claims processing with AI recommendations and adjuster approval" },
+      { industry: "Healthcare", description: "Medical diagnosis AI with physician validation workflows" },
+      { industry: "Banking", description: "Loan approval automation with risk officer oversight" },
+      { industry: "Manufacturing", description: "Quality control decisions with supervisor sign-off" },
+    ],
+  },
+  {
+    id: 3,
+    title: "Dev Environment",
+    description: "AI-powered development environment management with automated provisioning.",
+    icon: Zap,
+    color: "from-amber-400 via-orange-500 to-red-500",
+    glow: "amber",
+    tags: ["Docker", "Cloud", "Automation"],
+    useCases: [
+      { industry: "Telecom", description: "5G network simulation environments for testing new protocols" },
+      { industry: "Automotive", description: "ECU development environments with CAN bus simulation" },
+      { industry: "Banking", description: "PCI-DSS compliant sandbox environments for fintech development" },
+      { industry: "Healthcare", description: "FHIR-compliant healthcare app development containers" },
+    ],
+  },
+  {
+    id: 4,
+    title: "Workflow Orchestrator",
+    description: "Visual workflow builder with AI-assisted node configuration and execution monitoring.",
+    icon: Workflow,
+    color: "from-emerald-400 via-teal-500 to-cyan-500",
+    glow: "emerald",
+    tags: ["React Flow", "Visual Editor", "AI"],
+    useCases: [
+      { industry: "Manufacturing", description: "Smart factory automation with predictive maintenance workflows" },
+      { industry: "Insurance", description: "End-to-end claims processing from intake to settlement" },
+      { industry: "Banking", description: "Multi-step KYC/AML compliance workflows with regulatory checks" },
+      { industry: "Telecom", description: "Network provisioning and service activation pipelines" },
+    ],
+  },
+  {
+    id: 5,
+    title: "RAG Docs",
+    description: "Intelligent document processing with vector search and contextual AI responses.",
+    icon: FileText,
+    color: "from-rose-400 via-pink-500 to-fuchsia-500",
+    glow: "rose",
+    tags: ["RAG", "Vector DB", "NLP"],
+    useCases: [
+      { industry: "Healthcare", description: "Medical literature search for clinical decision support" },
+      { industry: "Banking", description: "Regulatory document analysis and compliance Q&A" },
+      { industry: "Military", description: "Intelligence report synthesis and threat assessment" },
+      { industry: "Insurance", description: "Policy document analysis for coverage verification" },
+    ],
+  },
+  {
+    id: 6,
+    title: "MCP + Fine-tuning",
+    description: "Model Context Protocol server with fine-tuning pipeline management and evaluation.",
+    icon: Server,
+    color: "from-indigo-400 via-violet-500 to-purple-500",
+    glow: "indigo",
+    tags: ["MCP", "LLM", "Training"],
+    useCases: [
+      { industry: "Automotive", description: "Fine-tuned models for predictive vehicle maintenance" },
+      { industry: "Healthcare", description: "Specialized medical LLMs for radiology and pathology" },
+      { industry: "Banking", description: "Fraud detection models trained on transaction patterns" },
+      { industry: "Telecom", description: "Network anomaly detection with custom-trained models" },
+    ],
+  },
+  {
+    id: 7,
+    title: "Multi-Agent Research",
+    description: "Collaborative AI agent system for deep research with autonomous task delegation.",
+    icon: Target,
+    color: "from-fuchsia-400 via-purple-500 to-violet-500",
+    glow: "fuchsia",
+    tags: ["Multi-Agent", "Research", "AI"],
+    useCases: [
+      { industry: "Military", description: "Multi-source intelligence gathering and threat correlation" },
+      { industry: "Healthcare", description: "Drug discovery research across scientific literature" },
+      { industry: "Banking", description: "Market analysis with automated financial research agents" },
+      { industry: "Insurance", description: "Risk assessment with automated claims investigation" },
+    ],
+  },
+  {
+    id: 8,
+    title: "Competitive Intelligence",
+    description: "AI-powered competitive analysis with automated monitoring and strategic insights.",
+    icon: Sparkles,
+    color: "from-sky-400 via-cyan-500 to-teal-500",
+    glow: "sky",
+    tags: ["Analytics", "Monitoring", "AI"],
+    useCases: [
+      { industry: "Telecom", description: "Competitor pricing analysis and market positioning insights" },
+      { industry: "Automotive", description: "EV technology tracking and supply chain intelligence" },
+      { industry: "Banking", description: "Fintech disruption monitoring and digital banking trends" },
+      { industry: "Manufacturing", description: "Patent landscape analysis and innovation tracking" },
+    ],
+  },
+];
+
+// Custom cursor component
+function CustomCursor() {
+  const cursorX = useMotionValue(-100);
+  const cursorY = useMotionValue(-100);
+  const spring
