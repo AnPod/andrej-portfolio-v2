@@ -3,8 +3,9 @@
 import { motion, useScroll, useTransform, useSpring, AnimatePresence, useMotionValue, useMotionTemplate } from "framer-motion";
 import { 
   ArrowUpRight, Sparkles, Brain, Workflow, 
-  Mail, MapPin, Github, Linkedin,
-  Award, Terminal, Cpu, Globe, ChevronRight, ExternalLink, Zap, Code2, Layers
+  MapPin, Github, Linkedin,
+  Award, Terminal, Cpu, Globe, ChevronRight, ExternalLink, Zap, Code2, Layers,
+  Send, CheckCircle, AlertCircle
 } from "lucide-react";
 import { useRef, useState, useEffect } from "react";
 
@@ -17,7 +18,6 @@ const professionalData = {
   tagline: "Building AI products that deliver real business value",
   description: "AI Architect, Engineer & Product Manager with 20+ years building AI-powered products across manufacturing, automotive, healthcare, banking, insurance, and telecommunications.",
   location: "Šentvid pri Stični, Slovenia",
-  email: "andrej@podgorsek.de",
   website: "podgorsek.de",
   certifications: [
     { name: "AI Solution Architect Expert", year: "2026" },
@@ -590,6 +590,206 @@ function ScrollProgress() {
 }
 
 // ============================================
+// CONTACT FORM COMPONENT
+// ============================================
+function ContactForm() {
+  const [formData, setFormData] = useState({
+    email: '',
+    subject: '',
+    message: '',
+    honeypot: '',
+  });
+  const [status, setStatus] = useState('idle');
+  const [errorMessage, setErrorMessage] = useState('');
+  const [submitTime, setSubmitTime] = useState(null);
+
+  useEffect(() => {
+    setSubmitTime(Date.now());
+  }, []);
+
+  const validateEmail = (email) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+
+  const validateForm = () => {
+    if (formData.honeypot) return 'Invalid submission';
+    
+    const timeSinceMount = Date.now() - submitTime;
+    if (timeSinceMount < 2000) return 'Please wait a moment before submitting';
+    
+    if (!formData.email.trim()) return 'Email is required';
+    if (!validateEmail(formData.email)) return 'Please enter a valid email';
+    if (!formData.subject.trim() || formData.subject.length < 3) return 'Subject must be at least 3 characters';
+    if (!formData.message.trim() || formData.message.length < 10) return 'Message must be at least 10 characters';
+    
+    return null;
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    
+    const validationError = validateForm();
+    if (validationError) {
+      setStatus('error');
+      setErrorMessage(validationError);
+      return;
+    }
+
+    setStatus('sending');
+    setErrorMessage('');
+
+    try {
+      const response = await fetch('/api/contact', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          email: formData.email.trim(),
+          subject: formData.subject.trim(),
+          message: formData.message.trim(),
+          timestamp: Date.now(),
+        }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || 'Failed to send message');
+      }
+
+      setStatus('success');
+      setFormData({ email: '', subject: '', message: '', honeypot: '' });
+      setTimeout(() => setStatus('idle'), 5000);
+    } catch (error) {
+      setStatus('error');
+      setErrorMessage(error.message || 'Failed to send message');
+    }
+  };
+
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({ ...prev, [name]: value }));
+  };
+
+  return (
+    <form onSubmit={handleSubmit} className="space-y-6 max-w-lg mx-auto">
+      {/* Honeypot field */}
+      <input
+        type="text"
+        name="honeypot"
+        value={formData.honeypot}
+        onChange={handleChange}
+        tabIndex="-1"
+        autoComplete="off"
+        className="absolute opacity-0 pointer-events-none"
+        aria-hidden="true"
+      />
+
+      <div>
+        <label htmlFor="email" className="block text-sm font-medium text-white/70 mb-2">
+          Email *
+        </label>
+        <input
+          type="email"
+          id="email"
+          name="email"
+          value={formData.email}
+          onChange={handleChange}
+          required
+          disabled={status === 'sending'}
+          className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-lg focus:border-cyan-400/50 focus:outline-none transition-colors text-white placeholder-white/30"
+          placeholder="your@email.com"
+        />
+      </div>
+
+      <div>
+        <label htmlFor="subject" className="block text-sm font-medium text-white/70 mb-2">
+          Subject *
+        </label>
+        <input
+          type="text"
+          id="subject"
+          name="subject"
+          value={formData.subject}
+          onChange={handleChange}
+          maxLength={200}
+          required
+          disabled={status === 'sending'}
+          className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-lg focus:border-cyan-400/50 focus:outline-none transition-colors text-white placeholder-white/30"
+          placeholder="What's this about?"
+        />
+      </div>
+
+      <div>
+        <label htmlFor="message" className="block text-sm font-medium text-white/70 mb-2">
+          Message *
+        </label>
+        <textarea
+          id="message"
+          name="message"
+          value={formData.message}
+          onChange={handleChange}
+          rows={5}
+          maxLength={5000}
+          required
+          disabled={status === 'sending'}
+          className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-lg focus:border-cyan-400/50 focus:outline-none transition-colors text-white placeholder-white/30 resize-none"
+          placeholder="Tell me about your project..."
+        />
+        <div className="text-right text-xs text-white/30 mt-1">
+          {formData.message.length}/5000
+        </div>
+      </div>
+
+      {status === 'error' && (
+        <motion.div
+          initial={{ opacity: 0, y: -10 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="flex items-center gap-2 text-red-400 text-sm"
+        >
+          <AlertCircle className="w-4 h-4" />
+          {errorMessage}
+        </motion.div>
+      )}
+
+      {status === 'success' && (
+        <motion.div
+          initial={{ opacity: 0, y: -10 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="flex items-center gap-2 text-green-400 text-sm"
+        >
+          <CheckCircle className="w-4 h-4" />
+          Message sent successfully! I'll get back to you soon.
+        </motion.div>
+      )}
+
+      <motion.button
+        type="submit"
+        disabled={status === 'sending'}
+        className="w-full group relative px-8 py-4 bg-gradient-to-r from-cyan-500 to-fuchsia-500 rounded-lg font-medium disabled:opacity-50 disabled:cursor-not-allowed overflow-hidden"
+        whileHover={{ scale: 1.02 }}
+        whileTap={{ scale: 0.98 }}
+      >
+        <span className="relative flex items-center justify-center gap-2">
+          {status === 'sending' ? (
+            <>
+              <motion.div
+                animate={{ rotate: 360 }}
+                transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
+                className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full"
+              />
+              Sending...
+            </>
+          ) : (
+            <>
+              <Send className="w-4 h-4" />
+              Send Message
+            </>
+          )}
+        </span>
+      </motion.button>
+    </form>
+  );
+}
+
+// ============================================
 // MAIN PAGE
 // ============================================
 export default function Page() {
@@ -904,16 +1104,10 @@ export default function Page() {
                 {professionalData.description}
               </p>
               
-              {/* Quick links */}
-              <div className="flex flex-wrap gap-4 mb-8">
-                <a href={`mailto:${professionalData.email}`} className="flex items-center gap-2 px-4 py-2 bg-white/5 border border-white/10 rounded-full text-sm hover:border-cyan-400/30 hover:bg-cyan-400/10 transition-all">
-                  <Mail className="w-4 h-4 text-cyan-400" />
-                  {professionalData.email}
-                </a>
-                <div className="flex items-center gap-2 px-4 py-2 bg-white/5 border border-white/10 rounded-full text-sm">
-                  <MapPin className="w-4 h-4 text-fuchsia-400" />
-                  {professionalData.location}
-                </div>
+              {/* Location */}
+              <div className="flex items-center gap-2 px-4 py-2 bg-white/5 border border-white/10 rounded-full text-sm mb-8 inline-flex">
+                <MapPin className="w-4 h-4 text-fuchsia-400" />
+                {professionalData.location}
               </div>
             </motion.div>
 
@@ -998,47 +1192,50 @@ export default function Page() {
 
       {/* Contact Section */}
       <section id="contact" className="relative py-32 px-6">
-        <div className="max-w-4xl mx-auto text-center">
+        <div className="max-w-4xl mx-auto">
           <motion.div
             initial={{ opacity: 0, y: 40 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ duration: 0.8 }}
+            className="text-center mb-12"
           >
-            <span className="text-xs font-mono text-white/30 tracking-widest mb-4 block">LET'S CONNECT</span>
-            <h2 className="text-5xl md:text-7xl font-bold font-display mb-8">
-              Ready to build<br />
-              something <span className="text-cyan-400">extraordinary</span>?
+            <span className="text-xs font-mono text-cyan-400 tracking-widest mb-4 block">GET IN TOUCH</span>
+            <h2 className="text-5xl md:text-6xl font-bold font-display mb-6">
+              Let's build<br />
+              something <span className="text-cyan-400">extraordinary</span>
             </h2>
-            <p className="text-white/50 text-lg mb-12 max-w-xl mx-auto">
-              I'm always interested in hearing about new projects and opportunities.
+            <p className="text-white/50 text-lg max-w-xl mx-auto">
+              Have a project in mind? Send me a message and let's discuss how we can work together.
             </p>
+          </motion.div>
 
-            <div className="flex flex-col sm:flex-row gap-4 justify-center mb-16">
-              <GlowingButton href={`mailto:${professionalData.email}`}>
-                Start a Conversation
-              </GlowingButton>
-            </div>
+          <ContactForm />
 
-            {/* Social Links */}
-            <div className="flex justify-center gap-8">
-              {[
-                { icon: Github, href: "https://github.com/AnPod", label: "GitHub" },
-                { icon: Linkedin, href: "https://linkedin.com/in/drejc", label: "LinkedIn" },
-                { icon: Globe, href: "https://podgorsek.de", label: "Website" }
-              ].map((social) => (
-                <a
-                  key={social.label}
-                  href={social.href}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="group flex items-center gap-2 text-white/30 hover:text-white transition-colors"
-                >
-                  <social.icon className="w-5 h-5" />
-                  <span className="text-sm font-mono">{social.label}</span>
-                </a>
-              ))}
-            </div>
+          {/* Social Links */}
+          <motion.div
+            initial={{ opacity: 0 }}
+            whileInView={{ opacity: 1 }}
+            viewport={{ once: true }}
+            transition={{ delay: 0.3 }}
+            className="flex justify-center gap-8 mt-16"
+          >
+            {[
+              { icon: Github, href: "https://github.com/AnPod", label: "GitHub" },
+              { icon: Linkedin, href: "https://linkedin.com/in/drejc", label: "LinkedIn" },
+              { icon: Globe, href: "https://podgorsek.de", label: "Website" }
+            ].map((social) => (
+              <a
+                key={social.label}
+                href={social.href}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="group flex items-center gap-2 text-white/30 hover:text-white transition-colors"
+              >
+                <social.icon className="w-5 h-5" />
+                <span className="text-sm font-mono">{social.label}</span>
+              </a>
+            ))}
           </motion.div>
         </div>
       </section>

@@ -1,137 +1,103 @@
 import { checkRateLimit, getRateLimitIdentifier } from './utils/rateLimit.js';
+import { validateContactForm, detectSpam, sanitizeForEmail } from './utils/contactValidation.js';
 
-const RECIPIENT_EMAIL = 'drejc83@gmail.com';
-const SENDER_EMAIL = 'andrej@podgorsek.de';
-const WEBHOOK_URL = process.env.RESEND_WEBHOOK_URL;
+const RECIPIENT_EMAIL = 'andrej@podgorsek.de';
 
-// Rate limiting: 5 submissions per hour per IP
-async function handler(req, res) {
+export default async function handler(req, res) {
   const requestId = Date.now().toString(36);
 
-  // CORS preflight
   if (req.method === 'OPTIONS') {
-    const origin = req.headers.origin;
-    if (origin) {
-      res.setHeader('Access-Control-Allow-Origin', origin);
-    }
+    res.setHeader('Access-Control-Allow-Origin', '*');
     res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
     res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
-    res.setHeader('Access-Control-Max-Age', '86400');
-    res.setHeader('Access-Control-Allow-Credentials', 'true');
     return res.status(200).end();
   }
 
-  // CORS headers
-  const origin = req.headers.origin;
-  if (origin) {
-    res.setHeader('Access-Control-Allow-Origin', origin);
-  }
+  res.setHeader('Access-Control-Allow-Origin', '*');
 
-  // Security headers
-  res.setHeader('X-Content-Type-Options', 'nosniff');
-  res.setHeader('X-Frame-Options', 'DENY');
-  res.setHeader('X-XSS-Protection', '1; mode=block');
-
-  // Only allow POST requests
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method not allowed' });
   }
 
-  // Rate limiting
   const clientIp = getRateLimitIdentifier(req);
   const rateLimit = checkRateLimit(`contact:${clientIp}`, {
-    windowMs: 60 * 60 * 1000, // 1 hour
-    max: 5, // 5 requests per hour
+    windowMs: 60 * 60 * 1000,
+    max: 5
   });
 
   if (!rateLimit.allowed) {
     res.setHeader('Retry-After', rateLimit.retryAfter);
     return res.status(429).json({
-      error: 'Too many contact form submissions. Please try again later.',
+      error: 'Too many submissions. Please try again later.',
       retryAfter: rateLimit.retryAfter
     });
   }
 
   try {
-    const body = await req.json();
+    const validatedData = validateContactForm(req.body);
 
-    // Validate required fields
-    if (!body.name || !body.email || !body.message) {
-      return res.status(400).json({
-        error: 'All fields are required'
-      });
+    if (detectSpam(validatedData.subject, validatedData.message)) {
+      return res.status(200).json({ success: true, message: 'Message received' });
     }
 
-    // Prepare email content (HTML format for better readability)
-    const emailContent = `
-      <div style="font-family: Arial, sans-serif; max-width: 600px; color: #333;">
-        <h2 style="color: #8b5cf6; margin-bottom: 20px;">New Contact Form Submission</h2>
-        
-        <div style="background: #f8f9fa; padding: 20px; border-radius: 8px; margin-bottom: 20px;">
-          <p><strong>Name:</strong> ${escapeHtml(body.name)}</p>
-          <p><strong>Email:</strong> <a href="mailto:${escapeHtml(body.email)}">${escapeHtml(body.email)}</a></p>
-          <p><strong>Subject:</strong> ${escapeHtml(body.subject || 'Portfolio Inquiry')}</p>
-        </div>
-        
-        <div style="background: #ffffff; padding: 20px; border-left: 4px solid #8b5cf6; border-radius: 8px;">
-          <h3 style="margin-top: 0; margin-bottom: 10px;">Message:</h3>
-          <p style="color: #555; white-space: pre-wrap;">${escapeHtml(body.message)}</p>
-        </div>
-        
-        <div style="margin-top: 20px; padding: 15px; background: #f3f4f6; border-radius: 8px;">
-          <p style="margin: 0; font-size: 14px; color: #666;">
-            <strong>From:</strong> Andrej Podgorsek Portfolio<br/>
-            <strong>Time:</strong> ${new Date().toISOString()}
-          </p>
-      </div>
-    `;
+    const sanitizedEmail = validatedData.email ? sanitizeForEmail(validatedData.email) : null;
+    const sanitizedSubject = sanitizeForEmail(validatedData.subject);
+    const sanitizedMessage = sanitizeForEmail(validatedData.message);
 
-    // Send via Resend webhook if available
-    if (WEBHOOK_URL) {
-      const webhookResponse = await fetch(WEBHOOK_URL, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          from: SENDER_EMAIL,
-          to: [RECIPIENT_EMAIL],
-          subject: `Portfolio Inquiry from ${body.name}`,
-          html: emailContent,
-          text: body.message,
-        }),
-      });
+    const hasResendKey = !!process.env.RESEND_API_KEY;
 
-      if (!webhookResponse.ok) {
-        console.error('Webhook failed:', await webhookResponse.text());
-        // Fall back to console
-      }
+    if (!hasResendKey) {
+      console.log('\n' + '='.repeat(70));
+      console.log(' CONTACT FORM SUBMISSION (Resend not configured)');
+      console.log('='.repeat(70));
+      console.log(`Request ID: ${requestId}`);
+      console.log(`From: ${sanitizedEmail || 'Not provided'}`);
+      console.log(`Subject: ${sanitizedSubject}`);
+      console.log(`Message: ${sanitizedMessage}`);
+      console.log('='.repeat(70));
+
+      return res.status(200).json({ success: true, message: 'Message received' });
     }
 
-    // Log for development/debugging
-    console.log(`[${requestId}] Contact form: ${body.name} (${body.email})`);
-    console.log(`Subject: ${body.subject || 'Portfolio Inquiry'}`);
-
-    return res.status(200).json({
-      success: true,
-      message: 'Thank you! I\'ll get back to you soon.'
+    const emailResponse = await fetch('https://api.resend.com/emails', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${process.env.RESEND_API_KEY}`,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        from: 'Portfolio Contact <onboarding@resend.dev>',
+        to: [RECIPIENT_EMAIL],
+        replyTo: sanitizedEmail || undefined,
+        subject: `[Portfolio] ${sanitizedSubject}`,
+        html: `
+          <h1>New Portfolio Contact</h1>
+          <p><strong>From:</strong> ${sanitizedEmail || 'Not provided'}</p>
+          <p><strong>Subject:</strong> ${sanitizedSubject}</p>
+          <p><strong>Message:</strong></p>
+          <p>${sanitizedMessage.replace(/\n/g, '<br>')}</p>
+          <hr>
+          <p><small>Request ID: ${requestId}</small></p>
+        `,
+        text: `From: ${sanitizedEmail || 'Not provided'}\nSubject: ${sanitizedSubject}\n\nMessage:\n${sanitizedMessage}`
+      })
     });
+
+    if (!emailResponse.ok) {
+      throw new Error('Failed to send email');
+    }
+
+    res.status(200).json({ success: true, message: 'Message sent successfully' });
 
   } catch (error) {
-    console.error('Contact form error:', error);
-    return res.status(500).json({
-      error: 'Something went wrong. Please try again.'
-    });
+    let statusCode = 500;
+    let errorMessage = 'Failed to send message.';
+
+    if (error.message?.includes('required') || error.message?.includes('Invalid')) {
+      statusCode = 400;
+      errorMessage = error.message;
+    }
+
+    res.status(statusCode).json({ error: errorMessage, requestId });
   }
 }
-
-function escapeHtml(text) {
-  return text
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;')
-    .replace(/'/g, '&#39;');
-}
-
-export { handler, config: { runtime: 'nodejs18.x' } };
