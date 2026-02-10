@@ -119,11 +119,15 @@ export async function POST(request: NextRequest) {
     let body;
     try {
       body = await request.json();
+      console.log(`[${requestId}] Parsed body:`, { email: body.email?.substring(0, 3) + '...', subject: body.subject?.substring(0, 10) + '...' });
     } catch {
+      console.log(`[${requestId}] Failed to parse JSON`);
       return NextResponse.json({ error: 'Invalid JSON in request body' }, { status: 400 });
     }
     
+    console.log(`[${requestId}] Validating form...`);
     const validated = validateContactForm(body);
+    console.log(`[${requestId}] Validation passed`);
 
     if (detectSpam(validated.subject, validated.message)) {
       return NextResponse.json({ success: true, message: 'Message received' });
@@ -177,7 +181,12 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ success: true, message: 'Message sent successfully' });
   } catch (error: unknown) {
     const err = error as Error;
-    const is400 = err.message?.includes('required') || err.message?.includes('Invalid');
+    // Check for validation errors (400) vs server errors (500)
+    const validationKeywords = ['required', 'Invalid', 'must be', 'characters', 'too long', 'too short', 'expired'];
+    const is400 = validationKeywords.some(kw => err.message?.toLowerCase().includes(kw.toLowerCase()));
+    
+    console.error(`API Error [${requestId}]:`, err.message);
+    
     return NextResponse.json(
       { error: is400 ? err.message : 'Failed to send message.', requestId },
       { status: is400 ? 400 : 500 }
