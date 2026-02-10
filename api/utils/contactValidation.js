@@ -96,11 +96,6 @@ export function detectSpam(subject, message) {
     return true;
   }
 
-  if (/(.)
-\1{10,}/.test(combinedText)) {
-    return true;
-  }
-
   const capsCount = (combinedText.match(/[A-Z]/g) || []).length;
   const totalChars = combinedText.replace(/\s/g, '').length;
   if (totalChars > 0 && capsCount / totalChars > 0.5) {
