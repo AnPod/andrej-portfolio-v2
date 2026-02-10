@@ -41,30 +41,58 @@ const projects = [
   {
     id: 1,
     title: "Code Review Agent",
-    description: "AI-powered code review with inline suggestions and automated quality gates.",
+    description: "AI-powered code review with inline suggestions, security scanning, and automated quality gates. Reduces manual review time while catching bugs early.",
     tags: ["TypeScript", "AI", "GitHub API"],
     metric: "40% faster reviews"
   },
   {
     id: 2,
     title: "Human-in-the-Loop",
-    description: "Smart approval workflows with AI suggestions and human oversight controls.",
+    description: "Smart approval workflows with AI confidence scoring and human oversight controls. Escalates uncertain decisions to humans while automating routine approvals.",
     tags: ["React", "Workflow", "AI"],
     metric: "3x throughput"
   },
   {
     id: 3,
-    title: "Dev Environment",
-    description: "AI-powered development environment management with automated provisioning.",
+    title: "Dev Environment Agent",
+    description: "AI-powered development environment management with automated provisioning, dependency resolution, and container orchestration. New developers productive in minutes.",
     tags: ["Docker", "Cloud", "Automation"],
     metric: "Zero setup time"
   },
   {
     id: 4,
     title: "Workflow Orchestrator",
-    description: "Visual workflow builder with AI-assisted node configuration.",
+    description: "Visual workflow builder with AI-assisted node configuration and intelligent error handling. Build complex automations without writing code.",
     tags: ["React Flow", "Visual Editor", "AI"],
     metric: "80% less code"
+  },
+  {
+    id: 5,
+    title: "RAG Docs",
+    description: "Retrieval-Augmented Generation for technical documentation. AI answers questions based on your actual docs, with source citations and confidence scoring.",
+    tags: ["RAG", "Vector DB", "OpenAI"],
+    metric: "95% accuracy"
+  },
+  {
+    id: 6,
+    title: "Multi-Agent Research",
+    description: "Coordinated AI agent teams for complex research tasks. Multiple specialized agents collaborate to gather, analyze, and synthesize information.",
+    tags: ["Multi-Agent", "LangChain", "Research"],
+    metric: "10x faster research"
+  },
+  {
+    id: 7,
+    title: "Competitive Intelligence",
+    description: "Automated competitive analysis monitoring competitor websites, news, and social media. AI-generated insights and strategic recommendations.",
+    tags: ["Scraping", "NLP", "Analytics"],
+    metric: "Real-time alerts"
+  },
+  {
+    id: 8,
+    title: "MCP + Fine-tuning",
+    description: "Model Context Protocol integration with custom fine-tuned models. Domain-specific AI trained on your data for superior performance.",
+    tags: ["MCP", "Fine-tuning", "LLM"],
+    metric: "Custom models"
   }
 ];
 
