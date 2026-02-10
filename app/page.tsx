@@ -17,7 +17,7 @@ const professionalData = {
   title: "AI Solution Architect",
   tagline: "Building AI products that deliver real business value",
   description: "AI Architect, Engineer & Product Manager with 20+ years building AI-powered products across manufacturing, automotive, healthcare, banking, insurance, and telecommunications.",
-  location: "Šentvid pri Stični, Slovenia",
+  location: "Munich, Germany — Available Worldwide",
   website: "podgorsek.de",
   certifications: [
     { name: "AI Solution Architect Expert", year: "2026" },
